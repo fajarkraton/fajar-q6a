@@ -1,0 +1,70 @@
+// q6a_blinky.fj — Radxa Dragon Q6A GPIO blinky demo
+//
+// Toggles GPIO25 (physical pin 11) to blink an LED.
+// Uses gpio_open/gpio_write/gpio_read builtins.
+// On x86_64 host, runs in simulation mode (no real hardware).
+//
+// Hardware setup:
+//   Pin 11 (GPIO25) → 220Ω resistor → LED → GND
+//
+// Build: fj build --board dragon-q6a examples/q6a_blinky.fj
+// Run:   ./fj run examples/q6a_blinky.fj
+
+fn main() {
+    println("=== Dragon Q6A GPIO Blinky Demo ===")
+    println("Board:  Radxa Dragon Q6A (QCS6490)")
+    println("GPIO:   /dev/gpiochip4")
+    println("Pin:    11 (GPIO25)")
+    println("")
+
+    // Open GPIO pin 25
+    let pin = gpio_open(25)
+    println("GPIO25 opened (handle: " + to_string(pin) + ")")
+
+    // Set as output
+    gpio_set_direction(pin, "out")
+    println("Direction: OUTPUT")
+    println("")
+
+    // Blink 5 times
+    println("=== Blinking ===")
+    let mut cycle = 0
+    while cycle < 5 {
+        // LED ON
+        gpio_write(pin, 1)
+        let level = gpio_read(pin)
+        println("  Cycle " + to_string(cycle) + ": LED = " + to_string(level) + " (ON)")
+
+        // LED OFF
+        gpio_write(pin, 0)
+        let level2 = gpio_read(pin)
+        println("  Cycle " + to_string(cycle) + ": LED = " + to_string(level2) + " (OFF)")
+
+        cycle = cycle + 1
+    }
+
+    // Test toggle
+    println("")
+    println("=== Toggle Test ===")
+    gpio_write(pin, 0)
+    println("  Initial: " + to_string(gpio_read(pin)))
+    gpio_toggle(pin)
+    println("  After toggle: " + to_string(gpio_read(pin)))
+    gpio_toggle(pin)
+    println("  After toggle: " + to_string(gpio_read(pin)))
+
+    // Board summary
+    println("")
+    println("=== Board Summary ===")
+    println("  SoC:     QCS6490 (TSMC 6nm)")
+    println("  CPU:     Kryo 670 (1+3+4 cores, 2.71 GHz max)")
+    println("  NPU:     Hexagon 770 V68, 12 TOPS INT8")
+    println("  GPU:     Adreno 643 @ 812 MHz")
+    println("  GPIO:    40-pin, 3.3V logic, /dev/gpiochip4")
+    println("  Target:  aarch64-unknown-linux-gnu")
+    println("")
+
+    // Cleanup
+    gpio_close(pin)
+    println("GPIO25 closed. Done!")
+}
